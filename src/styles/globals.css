@@ -1,0 +1,208 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 5.5rem;
+  }
+
+  :root {
+    /*
+     * Two curves, both strong easings. Not forks of each other:
+     *   reveal  entrances, reveals, on-screen movement into place
+     *   drawer  directional travel with a hard finish
+     */
+    --ease-reveal: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+    --dur-hover: 200ms;
+    --dur-press: 120ms;
+  }
+
+  /*
+   * Photography is desaturated and warmed so the documentary photos sit inside
+   * the warm monochrome canvas instead of fighting it. The teal accent stays
+   * the only saturated colour on the page.
+   */
+  .photo-warm {
+    filter: saturate(0.72) contrast(1.04) brightness(1.02);
+  }
+
+  body {
+    text-rendering: optimizeLegibility;
+  }
+
+  /*
+   * Colour and border feedback. Named properties only, never `transition: all`.
+   * Scoped off `transform` on purpose so these never fight a framer-motion
+   * element that owns its own transform.
+   */
+  a,
+  button,
+  [role='button'] {
+    transition:
+      color var(--dur-hover) var(--ease-reveal),
+      background-color var(--dur-hover) var(--ease-reveal),
+      border-color var(--dur-hover) var(--ease-reveal),
+      box-shadow var(--dur-hover) var(--ease-reveal);
+  }
+
+  /*
+   * Button press. Scoped to .btn rather than every button, because framer-motion
+   * elements own their transform inline and a global :active rule would compete
+   * with it. 120ms is the press-feedback band.
+   */
+  .btn {
+    transition:
+      color var(--dur-hover) var(--ease-reveal),
+      background-color var(--dur-hover) var(--ease-reveal),
+      border-color var(--dur-hover) var(--ease-reveal),
+      box-shadow var(--dur-hover) var(--ease-reveal),
+      transform var(--dur-press) var(--ease-reveal);
+  }
+
+  .btn:active {
+    transform: scale(0.98);
+  }
+
+  ::selection {
+    background: #1ed760;
+    color: #0a3d2a;
+  }
+}
+
+@layer components {
+  /*
+   * Focus ring: vibrant green outline with a surface-matched offset, so it stays legible
+   * on both the warm canvas and the deep green sections. Dark sections set
+   * --focus-offset themselves.
+   */
+  .focus-ring {
+    --focus-offset: #f7f6f3;
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+  }
+
+  .focus-ring:focus-visible {
+    outline-color: #1ed760;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 2px var(--focus-offset);
+  }
+
+  .on-dark .focus-ring {
+    --focus-offset: #0a3d2a;
+  }
+
+  /* The single hairline rule the protocol specifies. */
+  .hairline {
+    border: 1px solid #eaeaea;
+  }
+
+  .hairline-dark {
+    border: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  /* Section labels, sentence case. Never all-caps tracking micro-labels. */
+  .section-label {
+    @apply font-sans text-sm font-semibold text-brand-primaryInk;
+  }
+}
+
+@layer utilities {
+  /*
+   * Hover motion is gated behind a real pointer, and collapses entirely under
+   * prefers-reduced-motion. Card lift is a 4% shadow, nothing more.
+   */
+  @media (hover: hover) and (pointer: fine) {
+    .liftable {
+      transition:
+        box-shadow var(--dur-hover) var(--ease-reveal),
+        transform var(--dur-hover) var(--ease-reveal),
+        border-color var(--dur-hover) var(--ease-reveal);
+    }
+    .lift-parent:hover .liftable {
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+      transform: translateY(-2px);
+    }
+
+    .zoomable {
+      transition: transform 400ms var(--ease-reveal);
+    }
+    .zoom-parent:hover .zoomable {
+      transform: scale(1.05);
+    }
+
+    /*
+     * Scanning affordance on list rows. Colour only, no movement: a row that
+     * moves under the cursor makes reading harder, not easier.
+     */
+    .rowhover {
+      transition:
+        background-color var(--dur-hover) var(--ease-reveal),
+        border-color var(--dur-hover) var(--ease-reveal);
+    }
+    .row-parent:hover .rowhover {
+      background-color: rgba(30, 215, 96, 0.08);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+    .liftable,
+    .zoomable,
+    .btn:active {
+      transform: none !important;
+    }
+  }
+
+  /*
+   * Warm grain. Fixed and pointer-events-none so it never repaints on scroll.
+   */
+  .grain-layer {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    pointer-events: none;
+    opacity: 0.04;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* Enhanced ambient warmth with green tint */
+  .ambient-warm {
+    position: fixed;
+    z-index: 0;
+    pointer-events: none;
+    width: 46rem;
+    height: 46rem;
+    border-radius: 999px;
+    background: radial-gradient(circle, rgba(30, 215, 96, 0.4) 0%, rgba(30, 215, 96, 0) 70%);
+    opacity: 0.06;
+    filter: blur(80px);
+    animation: drift 24s ease-in-out infinite alternate;
+  }
+
+  @keyframes drift {
+    from {
+      transform: translate3d(-4%, -3%, 0) scale(1);
+    }
+    to {
+      transform: translate3d(5%, 4%, 0) scale(1.12);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ambient-warm {
+      animation: none;
+    }
+  }
+}
