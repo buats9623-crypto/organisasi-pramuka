@@ -39,28 +39,7 @@ Text Secondary: #647873
 - **Display**: Instrument Serif (headings)
 - **Body**: Schibsted Grotesk (content)
 
-## 🚀 Quick Start
 
-### Install Dependencies
-```bash
-npm install
-```
-
-### Development Server
-```bash
-npm run dev
-```
-Buka `http://localhost:5173`
-
-### Build for Production
-```bash
-npm run build
-```
-
-### Preview Production Build
-```bash
-npm run preview
-```
 
 ## 📁 Project Structure
 
